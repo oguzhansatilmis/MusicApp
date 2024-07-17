@@ -13,8 +13,8 @@ class MainActivity : ComponentActivity() {
         setContent {
             MusicAppTheme {
                 MediaPlayerUI()
-
             }
         }
     }
+
 }

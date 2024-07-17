@@ -1,10 +1,8 @@
 package com.example.musicapp
 
 import android.media.MediaPlayer
-import android.os.Build
-import android.os.Handler
-import android.os.Looper
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -15,16 +13,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Button
 import androidx.compose.material3.Slider
-import androidx.compose.material3.SliderColors
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -39,115 +34,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
-import java.security.Principal
-
-
-@Composable
-fun MediaPlayerUI2() {
-    val context = LocalContext.current
-    val mediaPlayer = remember {
-        MediaPlayer.create(context, R.raw.music)
-    }
-
-    var isPlaying by remember { mutableStateOf(false) }
-    var currentPosition by remember { mutableStateOf(0) }
-    var currentPositionSecond by remember { mutableStateOf(0) }
-    var duration by remember { mutableStateOf(0) }
-
-
-    LaunchedEffect(mediaPlayer) {
-        duration = mediaPlayer.duration
-        val durationInSeconds = duration / 1000
-        val minutes = durationInSeconds / 60
-        val seconds = durationInSeconds % 60
-        while (true) {
-            if (isPlaying) {
-                currentPosition = mediaPlayer.currentPosition
-                currentPositionSecond = currentPosition / 1000
-
-            }
-            kotlinx.coroutines.delay(1000L)
-        }
-
-
-    }
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(text = "Duration: ${duration / 1000} seconds")
-        Text(text = "Current Position: ${currentPosition / 1000} seconds")
-
-        Button(onClick = {
-            if (isPlaying) {
-                mediaPlayer.pause()
-            } else {
-                mediaPlayer.start()
-            }
-            isPlaying = !isPlaying
-        }) {
-            Text(text = if (isPlaying) "Pause" else "Play")
-        }
-    }
-}
-
-
-@Composable
-fun MediaPlayerUI3() {
-    val context = LocalContext.current
-    val mediaPlayer = remember {
-        MediaPlayer.create(context, R.raw.music)
-    }
-
-    var isPlaying by remember { mutableStateOf(false) }
-    var playbackSpeed by remember { mutableStateOf(1.0f) }
-
-    LaunchedEffect(playbackSpeed) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            mediaPlayer.playbackParams = mediaPlayer.playbackParams.setSpeed(playbackSpeed)
-        }
-    }
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(text = "Playback Speed: $playbackSpeed")
-        Button(onClick = {
-            //şarkı bitince sliderı sıfırla
-            if (isPlaying) {
-                mediaPlayer.pause()
-            } else {
-                mediaPlayer.start()
-            }
-            isPlaying = !isPlaying
-        }) {
-            Text(text = if (isPlaying) "Pause" else "Play")
-        }
-
-        Button(onClick = {
-            playbackSpeed = if (playbackSpeed == 1.0f) 0.25f else 1.0f
-        }) {
-            Text(text = "Toggle Playback Speed")
-        }
-    }
-}
-
 
 @Preview
 @Composable
 fun PreviewMediaPlayer() {
     MediaPlayerUI()
 }
-
-
 @Composable
 fun MediaPlayerUI() {
 
@@ -194,14 +86,14 @@ fun MediaPlayerUI() {
         }
     }
 
-    formattedTimeCurrent =
-        String.format("%02d:%02d", currentPositionMinutes, currentPositionSeconds)
+    formattedTimeCurrent = String.format("%02d:%02d", currentPositionMinutes, currentPositionSeconds)
 
-    formattedTimeDuration =
-        String.format("%02d:%02d", durationInSeconds / 60, durationInSeconds % 60)
+    formattedTimeDuration = String.format("%02d:%02d", durationInSeconds / 60, durationInSeconds % 60)
 
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .background(color = Color.Cyan),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -262,7 +154,7 @@ fun MediaPlayerUI() {
                         val newPosition =
                             (currentPosition - 5 * 1000).coerceAtLeast(0) // 5 saniye geri, 0'dan küçük olamaz
                         mediaPlayer.seekTo(newPosition)
-                        currentPositionSeconds = newPosition / 1000
+                        currentPositionSeconds = newPosition / 1000 %60
                         durationInSeconds = mediaPlayer.duration / 1000
                     }
             )
@@ -289,16 +181,16 @@ fun MediaPlayerUI() {
                     .noRippleClickable {
                             val newPosition = currentPosition + 5 * 1000 // 5 saniye ileri
                             mediaPlayer.seekTo(newPosition)
-                             currentPositionSeconds = newPosition / 1000
+                             currentPositionSeconds = newPosition / 1000 %60
                              durationInSeconds = mediaPlayer.duration / 1000
 
+                            println("forward")
+                             println(currentPositionSeconds)
+                             println(currentPositionMinutes)
                     }
             )
-
         }
-
     }
-
 }
 
 fun Modifier.noRippleClickable(onClick: () -> Unit): Modifier = composed {
